@@ -23,6 +23,10 @@
 #include <linux/leds-pm8058.h>
 #include <linux/wakelock.h>
 
+#ifdef CONFIG_TOUCHSCREEN_ATMEL_SWEEP2WAKE
+#include <linux/atmel_qt602240.h>
+#endif
+
 #ifdef CONFIG_HTC_HEADSET_MISC
 #include <mach/htc_headset_misc.h>
 #endif
@@ -189,7 +193,7 @@ static void pm8058_pwm_led_brightness_set(struct led_classdev *led_cdev,
 	}
 }
 
-static void pm8058_drvx_led_brightness_set(struct led_classdev *led_cdev,
+extern void pm8058_drvx_led_brightness_set(struct led_classdev *led_cdev,
 					   enum led_brightness brightness)
 {
 	struct pm8058_led_data *ldata;
@@ -642,6 +646,13 @@ static int pm8058_led_probe(struct platform_device *pdev)
 			goto err_register_attr_currents;
 		}
 	}
+
+#ifdef CONFIG_TOUCHSCREEN_ATMEL_SWEEP2WAKE
+	if (!strcmp(pdata->led_config[2].name, "button-backlight")) {
+		sweep2wake_setleddev(&ldata[2].ldev);
+		printk(KERN_INFO "[sweep2wake]: set led device %s, bank %d\n", pdata->led_config[2].name, ldata[2].bank);
+	}
+#endif
 
 	return 0;
 
