@@ -93,6 +93,9 @@ static struct pll pll2_tbl[] = {
 	{ 125, 0, 1, 1 }, /* 1200 MHz */
 	{  73, 0, 1, 0 }, /* 1401 MHz */
 	{  79, 0, 1, 0 }, /* 1500 MHz */
+	{  84, 0, 1, 0 }, /* 1.6 */
+	{  89, 0, 1, 0 }, /* 1.7 */
+	{  94, 0, 1, 0 }, /* 1.8 */
 };
 
 /* Use negative numbers for sources that can't be enabled/disabled */
@@ -133,6 +136,9 @@ static struct clkctl_acpu_speed acpu_freq_tbl[] = {
 	{ 1, 1200000, PLL_2, 3, 0, 192000000, 1200, VDD_RAW(1200), &pll2_tbl[2]},
 	{ 1, 1401600, PLL_2, 3, 0, 192000000, 1250, VDD_RAW(1250), &pll2_tbl[3]},
 	{ 1, 1516800, PLL_2, 3, 0, 192000000, 1300, VDD_RAW(1300), &pll2_tbl[4]},
+        { 1, 1612800, PLL_2, 3, 0, 192000000, 1400, VDD_RAW(1400), &pll2_tbl[4]},
+        { 1, 1708800, PLL_2, 3, 0, 192000000, 1400, VDD_RAW(1400), &pll2_tbl[4]},
+        { 1, 1804800, PLL_2, 3, 0, 192000000, 1450, VDD_RAW(1450), &pll2_tbl[4]},
 	{ 0 }
 };
 
