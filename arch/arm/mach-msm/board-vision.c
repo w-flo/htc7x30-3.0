@@ -1948,7 +1948,7 @@ static struct android_pmem_platform_data android_pmem_pdata = {
 	.name = "pmem",
 	.allocator_type = PMEM_ALLOCATORTYPE_ALLORNOTHING,
 	.cached = 1,
-	.memory_type = MEMTYPE_EBI1,
+	.memory_type = MEMTYPE_EBI0,
 };
 
 static struct platform_device android_pmem_device = {
@@ -1966,14 +1966,14 @@ static struct android_pmem_platform_data android_pmem_adsp_pdata = {
 	.name = "pmem_adsp",
 	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
 	.cached = 0,
-	.memory_type = MEMTYPE_EBI1,
+	.memory_type = MEMTYPE_EBI0,
 };
 
 static struct android_pmem_platform_data android_pmem_audio_pdata = {
 	.name = "pmem_audio",
 	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
 	.cached = 0,
-	.memory_type = MEMTYPE_EBI1,
+	.memory_type = MEMTYPE_EBI0,
 };
 
 static struct platform_device android_pmem_adsp_device = {
@@ -3419,7 +3419,7 @@ static void __init reserve_pmem_memory(void)
 	reserve_memory_for(&android_pmem_adsp_pdata);
 	reserve_memory_for(&android_pmem_audio_pdata);
 	reserve_memory_for(&android_pmem_pdata);
-	msm7x30_reserve_table[MEMTYPE_EBI1].size += PMEM_KERNEL_EBI1_SIZE;
+	msm7x30_reserve_table[MEMTYPE_EBI0].size += PMEM_KERNEL_EBI0_SIZE;
 #endif
 #endif
 }
@@ -3436,9 +3436,9 @@ static void __init size_ion_devices(void)
 static void __init reserve_ion_memory(void)
 {
 #if defined(CONFIG_ION_MSM) && defined(CONFIG_MSM_MULTIMEDIA_USE_ION)
-	msm7x30_reserve_table[MEMTYPE_EBI1].size += msm_ion_camera_size;
-	msm7x30_reserve_table[MEMTYPE_EBI1].size += MSM_ION_AUDIO_SIZE;
-	msm7x30_reserve_table[MEMTYPE_EBI1].size += MSM_ION_SF_SIZE;
+	msm7x30_reserve_table[MEMTYPE_EBI0].size += msm_ion_camera_size;
+	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_AUDIO_SIZE;
+	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_SF_SIZE;
 #endif
 }
 
@@ -3454,7 +3454,7 @@ static void __init msm7x30_calculate_reserve_sizes(void)
 static int msm7x30_paddr_to_memtype(unsigned int paddr)
 {
 	if (paddr < 0x40000000)
-		return MEMTYPE_EBI1;
+		return MEMTYPE_EBI0;
 	if (paddr >= 0x40000000 && paddr < 0x80000000)
 		return MEMTYPE_EBI1;
 	return MEMTYPE_NONE;
