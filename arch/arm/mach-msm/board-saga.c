@@ -3152,7 +3152,7 @@ static struct android_pmem_platform_data android_pmem_pdata = {
 	.name = "pmem",
 	.allocator_type = PMEM_ALLOCATORTYPE_ALLORNOTHING,
 	.cached = 1,
-	.memory_type = MEMTYPE_EBI1,
+	.memory_type = MEMTYPE_EBI0,
 };
 
 static struct platform_device android_pmem_device = {
@@ -3280,7 +3280,7 @@ static struct android_pmem_platform_data android_pmem_adsp_pdata = {
        .name = "pmem_adsp",
        .allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
        .cached = 0,
-	.memory_type = MEMTYPE_EBI1,
+	.memory_type = MEMTYPE_EBI0,
 };
 
 static struct android_pmem_platform_data android_pmem_audio_pdata = {
@@ -5408,7 +5408,7 @@ static void __init size_pmem_devices(void)
   size_pmem_device(&android_pmem_adsp_pdata, 0, pmem_adsp_size);
   size_pmem_device(&android_pmem_audio_pdata, 0, pmem_audio_size);
   size_pmem_device(&android_pmem_pdata, 0, pmem_sf_size);
-  msm7x30_reserve_table[MEMTYPE_EBI1].size += PMEM_KERNEL_EBI1_SIZE;
+  msm7x30_reserve_table[MEMTYPE_EBI0].size += PMEM_KERNEL_EBI0_SIZE;
 #endif
 }
 
@@ -5438,9 +5438,9 @@ static void __init msm7x30_calculate_reserve_sizes(void)
 static int msm7x30_paddr_to_memtype(unsigned int paddr)
 {
 	if (paddr < 0x40000000)
-		return MEMTYPE_EBI1;
+		return MEMTYPE_EBI0;
 	if (paddr >= 0x40000000 && paddr < 0x80000000)
-		return MEMTYPE_EBI1;
+		return MEMTYPE_EBI0;
 	return MEMTYPE_NONE;
 }
 
