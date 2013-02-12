@@ -383,6 +383,13 @@ config FB_MSM_SAGA_PANEL
 	---help---
 	  Support for Saga WVGA (800x480) panels
 
+config FB_MSM_SAGA_MDDI_PANEL
+        depends on FB_MSM_LCDC_HW && MACH_SAGA
+        bool "MDDI Saga WVGA Panels"
+        select FB_MSM_MDDI
+        ---help---
+          Support for Saga WVGA (800x480) panels
+
 config FB_MSM_SPADE_PANEL
 	depends on FB_MSM_LCDC_HW && MACH_SPADE
 	bool "LCDC Spade WVGA Panels"
