@@ -129,7 +129,7 @@ static struct clkctl_acpu_speed acpu_freq_tbl[] = {
 	/* AXI has MSMC1 implications. See above. */
 
 #ifdef CONFIG_MACH_SAGA
-        { 1, 768000,  PLL_1, 2, 0, 153600000, 950, VDD_RAW(1050) },
+        { 1, 768000,  PLL_1, 2, 0, 153600000, 950, VDD_RAW(950) },
 	{ 1, 806400,  PLL_2, 3, 0, 192000000, 1025, VDD_RAW(1025), &pll2_tbl[0]},
 	{ 1, 1024000, PLL_2, 3, 0, 192000000, 1050, VDD_RAW(1050), &pll2_tbl[1]},
 	{ 1, 1200000, PLL_2, 3, 0, 192000000, 1100, VDD_RAW(1100), &pll2_tbl[2]},
