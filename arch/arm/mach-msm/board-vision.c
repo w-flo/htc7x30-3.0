@@ -3150,9 +3150,9 @@ static struct platform_device *devices[] __initdata = {
 #ifdef CONFIG_ION_MSM
         &ion_dev,
 #endif
-
-&msm_bluesleep_device,
-
+#ifdef CONFIG_BT_MSM_SLEEP
+        &msm_bluesleep_device,
+#endif
 #ifdef CONFIG_SERIAL_MSM_HS
         &msm_device_uart_dm1,
 #endif
