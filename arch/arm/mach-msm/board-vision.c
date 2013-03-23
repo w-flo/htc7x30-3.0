@@ -3346,12 +3346,10 @@ static int __init pmem_audio_size_setup(char *p)
 early_param("pmem_audio_size", pmem_audio_size_setup);
 
 #ifdef CONFIG_ION_MSM
-#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_co_heap_pdata co_ion_pdata = {
 	.adjacent_mem_id = INVALID_HEAP_ID,
 	.align = PAGE_SIZE,
 };
-#endif
 
 /**
  * These heaps are listed in the order they will be allocated.
@@ -3384,16 +3382,17 @@ static struct ion_platform_data ion_pdata = {
 			.has_outer_cache = 1,
 			.extra_data = (void *)&co_ion_pdata,
 		},
+#endif
 		/* PMEM_MDP = SF */
 		{
 			.id	= ION_SF_HEAP_ID,
 			.type	= ION_HEAP_TYPE_CARVEOUT,
 			.name	= ION_SF_HEAP_NAME,
+                        .size   = MSM_ION_SF_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.has_outer_cache = 1,
 			.extra_data = (void *)&co_ion_pdata,
 		},
-#endif
 	}
 };
 
