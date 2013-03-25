@@ -22,7 +22,7 @@ DHDCFLAGS = -DLINUX -DBCMDRIVER -DBCMDONGLEHOST -DUNRELEASEDCHIP -DBCMDMA32  \
 	-DPNO_SUPPORT -DBCMSDIO -DDHD_GPL -DBCMLXSDMMC -DBCMPLATFORM_BUS -DWIFI_ACT_FRAME -DKEEP_ALIVE -DDHD_DEBUG \
 	-DCSCAN -DBCM4329_LOW_POWER  -DBCMWAPI_WAI -DBCMWAPI_WPI -DHTC_KlocWork -DWL_CFG80211 -DWLP2P -DWL_COMPAT_WIRELESS\
 	-Wall -Wstrict-prototypes -Werror                                    \
-	-Idrivers/net/wireless/bcmdhd -Idrivers/net/wireless/bcmdhd/include
+	-Idrivers/net/wireless/bcmdhd_htc -Idrivers/net/wireless/bcmdhd_htc/include
 	#-I$(M) -I$(M)/include
 	# CFG 80211 and P2P compile flag
 	#-DWL_CFG80211 -DWLP2P -DWL_COMPAT_WIRELESS -DDHD_DEBUG \
