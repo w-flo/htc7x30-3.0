@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Linux/arm 3.0.71 Kernel Configuration
+# Linux/arm 3.0.73 Kernel Configuration
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -576,6 +576,7 @@ CONFIG_NEED_PER_CPU_KM=y
 # CONFIG_ARCH_ENABLE_MEMORY_HOTREMOVE is not set
 CONFIG_FORCE_MAX_ZONEORDER=11
 CONFIG_ALIGNMENT_TRAP=y
+CONFIG_ALLOW_CPU_ALIGNMENT=y
 # CONFIG_UACCESS_WITH_MEMCPY is not set
 # CONFIG_SECCOMP is not set
 # CONFIG_CC_STACKPROTECTOR is not set
@@ -1021,7 +1022,7 @@ CONFIG_BT_HCIUART_LL=y
 # CONFIG_BT_HCIUART_IBS is not set
 # CONFIG_BT_HCIBCM203X is not set
 # CONFIG_BT_HCIBPA10X is not set
-CONFIG_BT_MSM_SLEEP=y
+# CONFIG_BT_MSM_SLEEP is not set
 # CONFIG_BT_HCIBFUSB is not set
 # CONFIG_BT_HCIVHCI is not set
 # CONFIG_BT_MRVL is not set
