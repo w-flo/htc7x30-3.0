@@ -13,10 +13,6 @@
  *
  */
 
-#if defined(CONFIG_ARCH_MSM8X60)
-#include <linux/msm_audio_8X60.h>
-#endif
-
 #ifndef __LINUX_MSM_AUDIO_H
 #define __LINUX_MSM_AUDIO_H
 

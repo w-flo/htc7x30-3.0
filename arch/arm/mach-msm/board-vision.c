@@ -63,14 +63,14 @@
 #endif
 #include <mach/rpc_hsusb.h>
 #include <mach/msm_spi.h>
-#include <mach/qdsp5v2_2x/msm_lpa.h>
+#include <mach/qdsp5v2/msm_lpa.h>
 #include <mach/dma.h>
 #include <linux/android_pmem.h>
 #include <linux/input/msm_ts.h>
 #include <mach/rpc_pmapp.h>
-#include <mach/qdsp5v2_2x/aux_pcm.h>
-#include <mach/qdsp5v2_2x/mi2s.h>
-#include <mach/qdsp5v2_2x/audio_dev_ctl.h>
+#include <mach/qdsp5v2/aux_pcm.h>
+#include <mach/qdsp5v2/mi2s.h>
+#include <mach/qdsp5v2/audio_dev_ctl.h>
 #include <mach/htc_battery.h>
 #include <linux/tps65200.h>
 #include <mach/rpc_server_handset.h>
@@ -104,8 +104,8 @@
 #ifdef CONFIG_SERIAL_MSM_HS_PURE_ANDROID
 #include <mach/bcm_bt_lpm.h>
 #endif
-#include <mach/qdsp5v2_2x/mi2s.h>
-#include <mach/qdsp5v2_2x/audio_dev_ctl.h>
+#include <mach/qdsp5v2/mi2s.h>
+#include <mach/qdsp5v2/audio_dev_ctl.h>
 #include <mach/sdio_al.h>
 #include "smd_private.h"
 #include "board-vision.h"
@@ -1612,52 +1612,231 @@ static struct platform_device msm_device_adspdec = {
 	},
 };
 
-static unsigned aux_pcm_gpio_off[] = {
-	PCOM_GPIO_CFG(138, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_2MA),   /* PCM_DOUT */
-	PCOM_GPIO_CFG(139, 0, GPIO_INPUT, GPIO_NO_PULL, GPIO_2MA),   /* PCM_DIN  */
-	PCOM_GPIO_CFG(140, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_2MA),   /* PCM_SYNC */
-	PCOM_GPIO_CFG(141, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_2MA),   /* PCM_CLK  */
+
+static unsigned aux_pcm_gpio_on[] = {
+	GPIO_CFG(138, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),   /* PCM_DOUT */
+	GPIO_CFG(139, 1, GPIO_CFG_INPUT,  GPIO_CFG_NO_PULL, GPIO_CFG_2MA),   /* PCM_DIN  */
+	GPIO_CFG(140, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),   /* PCM_SYNC */
+	GPIO_CFG(141, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),   /* PCM_CLK  */
 };
 
-static void __init aux_pcm_gpio_init(void)
+static int __init aux_pcm_gpio_init(void)
 {
-	config_gpio_table(aux_pcm_gpio_off,
-		ARRAY_SIZE(aux_pcm_gpio_off));
+	int pin, rc;
+
+	pr_info("aux_pcm_gpio_init \n");
+	for (pin = 0; pin < ARRAY_SIZE(aux_pcm_gpio_on); pin++) {
+		rc = gpio_tlmm_config(aux_pcm_gpio_on[pin],
+					GPIO_CFG_ENABLE);
+		if (rc) {
+			printk(KERN_ERR
+				"%s: gpio_tlmm_config(%#x)=%d\n",
+				__func__, aux_pcm_gpio_on[pin], rc);
+		}
+	}
+	return rc;
 }
 
-static uint32_t audience_gpio_on_table[] = {
-  PCOM_GPIO_CFG(VISION_AUD_A1026_INT, 0, GPIO_OUTPUT, GPIO_NO_PULL, GPIO_8MA),
-	PCOM_GPIO_CFG(VISION_AUD_MICPATH_SEL, 0, GPIO_OUTPUT, GPIO_NO_PULL, GPIO_8MA),
-	PCOM_GPIO_CFG(VISION_AUD_A1026_RESET, 0, GPIO_OUTPUT, GPIO_NO_PULL, GPIO_8MA),
-  PCOM_GPIO_CFG(VISION_AUD_A1026_WAKEUP, 0, GPIO_OUTPUT, GPIO_NO_PULL, GPIO_8MA),
+static struct msm_gpio mi2s_clk_gpios[] = {
+	{ GPIO_CFG(145, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_SCLK"},
+	{ GPIO_CFG(144, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_WS"},
+	{ GPIO_CFG(120, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_MCLK_A"},
 };
-static void __init audience_gpio_init(void)
+
+static struct msm_gpio mi2s_rx_data_lines_gpios[] = {
+	{ GPIO_CFG(121, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_DATA_SD0_A"},
+	{ GPIO_CFG(122, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_DATA_SD1_A"},
+	{ GPIO_CFG(123, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_DATA_SD2_A"},
+	{ GPIO_CFG(146, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_DATA_SD3"},
+};
+
+static struct msm_gpio mi2s_tx_data_lines_gpios[] = {
+	{ GPIO_CFG(146, 1, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+	    "MI2S_DATA_SD3"},
+};
+
+int mi2s_config_clk_gpio(void)
 {
-  /*Bit2:
-    0: with audience.
-    1: without audience*/
-  if (engineerid & 0x4) {
-    config_gpio_table(audience_gpio_on_table, ARRAY_SIZE(audience_gpio_on_table));
-    gpio_set_value(VISION_AUD_A1026_INT, 0);
-    mdelay(1);
-    gpio_set_value(VISION_AUD_MICPATH_SEL, 0);
-    mdelay(1);
-    gpio_set_value(VISION_AUD_A1026_RESET, 0);
-    mdelay(1);
-    gpio_set_value(VISION_AUD_A1026_WAKEUP, 0);
-    mdelay(1);
-#if 0
-    gpio_configure(VISION_AUD_A1026_INT,
-		   GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-    gpio_configure(VISION_AUD_MICPATH_SEL,
-		   GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-    gpio_configure(VISION_AUD_A1026_RESET,
-		   GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-    gpio_configure(VISION_AUD_A1026_WAKEUP,
-		   GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-#endif
-    pr_info("Configure audio codec gpio for devices without audience.\n");
-  }
+	int rc = 0;
+
+	rc = msm_gpios_request_enable(mi2s_clk_gpios,
+			ARRAY_SIZE(mi2s_clk_gpios));
+	if (rc) {
+		pr_err("%s: enable mi2s clk gpios  failed\n",
+					__func__);
+		return rc;
+	}
+	return 0;
+}
+
+int  mi2s_unconfig_data_gpio(u32 direction, u8 sd_line_mask)
+{
+	int i, rc = 0;
+	sd_line_mask &= MI2S_SD_LINE_MASK;
+
+	switch (direction) {
+	case DIR_TX:
+		msm_gpios_disable_free(mi2s_tx_data_lines_gpios, 1);
+		break;
+	case DIR_RX:
+		i = 0;
+		while (sd_line_mask) {
+			if (sd_line_mask & 0x1)
+				msm_gpios_disable_free(
+					mi2s_rx_data_lines_gpios + i , 1);
+			sd_line_mask = sd_line_mask >> 1;
+			i++;
+		}
+		break;
+	default:
+		pr_err("%s: Invaild direction  direction = %u\n",
+						__func__, direction);
+		rc = -EINVAL;
+		break;
+	}
+	return rc;
+}
+
+int mi2s_config_data_gpio(u32 direction, u8 sd_line_mask)
+{
+	int i , rc = 0;
+	u8 sd_config_done_mask = 0;
+
+	sd_line_mask &= MI2S_SD_LINE_MASK;
+
+	switch (direction) {
+	case DIR_TX:
+		if ((sd_line_mask & MI2S_SD_0) || (sd_line_mask & MI2S_SD_1) ||
+		   (sd_line_mask & MI2S_SD_2) || !(sd_line_mask & MI2S_SD_3)) {
+			pr_err("%s: can not use SD0 or SD1 or SD2 for TX"
+				".only can use SD3. sd_line_mask = 0x%x\n",
+				__func__ , sd_line_mask);
+			rc = -EINVAL;
+		} else {
+			rc = msm_gpios_request_enable(mi2s_tx_data_lines_gpios,
+							 1);
+			if (rc)
+				pr_err("%s: enable mi2s gpios for TX failed\n",
+					   __func__);
+		}
+		break;
+	case DIR_RX:
+		i = 0;
+		while (sd_line_mask && (rc == 0)) {
+			if (sd_line_mask & 0x1) {
+				rc = msm_gpios_request_enable(
+					mi2s_rx_data_lines_gpios + i , 1);
+				if (rc) {
+					pr_err("%s: enable mi2s gpios for"
+					 "RX failed.  SD line = %s\n",
+					 __func__,
+					 (mi2s_rx_data_lines_gpios + i)->label);
+					mi2s_unconfig_data_gpio(DIR_RX,
+						sd_config_done_mask);
+				} else
+					sd_config_done_mask |= (1 << i);
+			}
+			sd_line_mask = sd_line_mask >> 1;
+			i++;
+		}
+		break;
+	default:
+		pr_err("%s: Invaild direction  direction = %u\n",
+			__func__, direction);
+		rc = -EINVAL;
+		break;
+	}
+	return rc;
+}
+
+int mi2s_unconfig_clk_gpio(void)
+{
+	msm_gpios_disable_free(mi2s_clk_gpios, ARRAY_SIZE(mi2s_clk_gpios));
+	return 0;
+}
+static uint32_t audio_pamp_gpio_config =
+   GPIO_CFG(82, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA);
+
+static int __init snddev_poweramp_gpio_init(void)
+{
+	int rc;
+
+	pr_info("snddev_poweramp_gpio_init \n");
+	rc = gpio_tlmm_config(audio_pamp_gpio_config, GPIO_CFG_ENABLE);
+	if (rc) {
+		printk(KERN_ERR
+			"%s: gpio_tlmm_config(%#x)=%d\n",
+			__func__, audio_pamp_gpio_config, rc);
+	}
+	return rc;
+}
+void msm_snddev_poweramp_on(void)
+{
+	gpio_set_value(82, 1);	/* enable spkr poweramp */
+	pr_info("%s: power on amplifier\n", __func__);
+}
+
+void msm_snddev_poweramp_off(void)
+{
+	gpio_set_value(82, 0);	/* disable spkr poweramp */
+	pr_info("%s: power off amplifier\n", __func__);
+}
+
+static struct regulator_bulk_data snddev_regs[] = {
+	{ .supply = "gp4", .min_uV = 2600000, .max_uV = 2600000 },
+	{ .supply = "ncp", .min_uV = 1800000, .max_uV = 1800000 },
+};
+
+static int __init snddev_hsed_voltage_init(void)
+{
+	int rc;
+
+	rc = regulator_bulk_get(NULL, ARRAY_SIZE(snddev_regs), snddev_regs);
+
+	if (rc) {
+		pr_err("%s: could not get regulators: %d\n", __func__, rc);
+		goto out;
+	}
+
+	rc = regulator_bulk_set_voltage(ARRAY_SIZE(snddev_regs), snddev_regs);
+
+	if (rc) {
+		pr_err("%s: could not set regulator voltages: %d\n",
+				__func__, rc);
+		goto regs_free;
+	}
+
+	return 0;
+
+regs_free:
+	regulator_bulk_free(ARRAY_SIZE(snddev_regs), snddev_regs);
+out:
+	return rc;
+}
+
+
+void msm_snddev_hsed_voltage_on(void)
+{
+	int rc = regulator_bulk_enable(ARRAY_SIZE(snddev_regs), snddev_regs);
+
+	if (rc)
+		pr_err("%s: could not enable regulators: %d\n", __func__, rc);
+}
+
+void msm_snddev_hsed_voltage_off(void)
+{
+	int rc = regulator_bulk_disable(ARRAY_SIZE(snddev_regs), snddev_regs);
+
+	if (rc) {
+		pr_err("%s: could not disable regulators: %d\n", __func__, rc);
+	}
 }
 #endif /* CONFIG_MSM7KV2_AUDIO */
 
@@ -3260,9 +3439,9 @@ static void __init vision_init(void)
 	qup_device_i2c_init();
 	vision_init_marimba();
 #ifdef CONFIG_MSM7KV2_AUDIO
+	snddev_poweramp_gpio_init();
+	snddev_hsed_voltage_init();
 	aux_pcm_gpio_init();
-	msm_snddev_init();
-	audience_gpio_init();
 #endif
 
 	i2c_register_board_info(2, msm_marimba_board_info,
@@ -3312,7 +3491,6 @@ static void __init vision_init(void)
 	i2c_register_board_info(0, i2c_devices,	ARRAY_SIZE(i2c_devices));
 	vision_init_keypad();
 	vision_init_panel();
-	vision_audio_init();
 	vision_wifi_init();
 	msm_init_pmic_vibrator(3000);
 }
