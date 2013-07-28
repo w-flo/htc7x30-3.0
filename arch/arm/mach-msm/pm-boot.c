@@ -33,7 +33,7 @@ static int __init msm_pm_tz_boot_init(void)
 	else if (num_possible_cpus() == 2)
 		flag = SCM_FLAG_WARMBOOT_CPU0 | SCM_FLAG_WARMBOOT_CPU1;
 	else
-		__WARN();
+		WARN_ON(1);
 
 	return scm_set_boot_addr((void *)virt_to_phys(msm_pm_boot_entry), flag);
 }
@@ -107,7 +107,7 @@ int __init msm_pm_boot_init(int tz_available, uint32_t *address)
 			= msm_pm_config_rst_vector_after_pc;
 		break;
 	default:
-		__WARN();
+		WARN_ON(1);
 	}
 
 	return ret;
