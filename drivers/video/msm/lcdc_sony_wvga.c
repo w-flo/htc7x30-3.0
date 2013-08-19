@@ -20,7 +20,7 @@
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
 #include <linux/wakelock.h>
-#include <linux/leds.h>
+#include <linux/backlight.h>
 #include <asm/mach-types.h>
 #include <mach/vreg.h>
 #include <linux/gpio.h>
@@ -355,17 +355,24 @@ static int sonywvga_panel_blank(struct platform_device *pdev)
 	return 0;
 }
 
-void sonywvga_brightness_set(struct led_classdev *led_cdev,
-			enum led_brightness val)
+static int sonywvga_backlight_set_brightness(struct backlight_device *bd)
 {
-	led_cdev->brightness = val;
-
+	int intensity;
 	mutex_lock(&panel_lock);
+	intensity = bd->props.brightness;
+
+	last_val_pwm = intensity;
+
 	if(g_unblank_stage)
-		sonywvga_set_gamma_val(val);
-	else
-		last_val_pwm =val;
+		sonywvga_set_gamma_val(intensity);
+
 	mutex_unlock(&panel_lock);
+	return 0;
+}
+
+static int sonywvga_backlight_get_brightness(struct backlight_device *bd)
+{
+	return bd->props.brightness;
 }
 
 static struct msm_fb_panel_data sonywvga_panel_data = {
@@ -381,19 +388,31 @@ static struct platform_device this_device = {
 	},
 };
 
-static struct led_classdev sonywvga_backlight_led = {
-	.name = "lcd-backlight",
-	.brightness = LED_FULL,
-	.brightness_set = sonywvga_brightness_set,
+static struct backlight_ops sonywvga_backlight_ops = {
+	.options 		= BL_CORE_SUSPENDRESUME,
+	.update_status 	= sonywvga_backlight_set_brightness,
+	.get_brightness	= sonywvga_backlight_get_brightness,
 };
 
 static int sonywvga_backlight_probe(struct platform_device *pdev)
 {
-	int rc;
+	struct backlight_device *bd;
+	struct backlight_properties props;
 
-	rc = led_classdev_register(&pdev->dev, &sonywvga_backlight_led);
-	if (rc)
-		LCMDBG("backlight: failure on register led_classdev\n");
+	memset(&props, 0, sizeof(struct backlight_properties));
+	props.type = BACKLIGHT_RAW;
+	bd = backlight_device_register("sonywvga-backlight", &pdev->dev, NULL,
+			&sonywvga_backlight_ops, &props);
+	bd->props.max_brightness = SONYWVGA_MAX_VAL;
+	bd->props.brightness = SONYWVGA_DEFAULT_VAL;
+	sonywvga_backlight_set_brightness(bd);
+	return 0;
+}
+
+static int sonywvga_backlight_remove(struct platform_device *pdev)
+{
+	struct backlight_device *bl = platform_get_drvdata(pdev);
+	backlight_device_unregister(bl);
 	return 0;
 }
 
@@ -403,6 +422,7 @@ static struct platform_device sonywvga_backlight = {
 
 static struct platform_driver sonywvga_backlight_driver = {
 	.probe		= sonywvga_backlight_probe,
+	.remove		= sonywvga_backlight_remove,
 	.driver		= {
 		.name	= "sonywvga-backlight",
 		.owner	= THIS_MODULE,
