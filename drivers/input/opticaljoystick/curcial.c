@@ -204,6 +204,9 @@ static int curcial_oj_init(void)
 }
 static OJKeyEvt_T OJ_ProcessNavi(int Ratio, int DeltaMin, int16_t SumDeltaX, int16_t SumDeltaY)
 {
+	return OJ_KEY_NONE;
+
+#if 0
 	OJKeyEvt_T	tmpKey;
 
 	if ((10*abs(SumDeltaY) > (Ratio*abs(SumDeltaX)))
@@ -221,6 +224,7 @@ static OJKeyEvt_T OJ_ProcessNavi(int Ratio, int DeltaMin, int16_t SumDeltaX, int
 		tmpKey = OJ_KEY_NONE;
 
 	return tmpKey;
+#endif
 }
 
 static void curcial_oj_work_func(struct work_struct *work)
