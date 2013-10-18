@@ -140,7 +140,7 @@ static struct gpio_event_direct_entry vision_keypad_input_map[] = {
 	},
 	{
 		.gpio = PM8058_GPIO_PM_TO_SYS(VISION_OJ_ACTION),
-		.code = BTN_MOUSE,
+		.code = KEY_POWER,
 	},
 	{
 		.gpio = PM8058_GPIO_PM_TO_SYS(VISION_CAM_STEP2),
