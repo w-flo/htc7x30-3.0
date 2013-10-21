@@ -3353,6 +3353,13 @@ early_param("pmem_audio_size", pmem_audio_size_setup);
 
 #ifdef CONFIG_ION_MSM
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
+static struct ion_cp_heap_pdata cp_ion_pdata = {
+	.permission_type = IPT_TYPE_MM_CARVEOUT,
+	.align = PAGE_SIZE,
+	.reusable = 0,
+	.mem_is_fmem = 0,
+	.fixed_position = FIXED_MIDDLE,
+};
 static struct ion_co_heap_pdata co_ion_pdata = {
 	.adjacent_mem_id = INVALID_HEAP_ID,
 	.align = PAGE_SIZE,
@@ -3398,6 +3405,14 @@ static struct ion_platform_data ion_pdata = {
 			.memory_type = ION_EBI_TYPE,
 			.has_outer_cache = 1,
 			.extra_data = (void *)&co_ion_pdata,
+		},
+		{
+			.id     = ION_CP_MM_HEAP_ID,
+			.type   = ION_HEAP_TYPE_CP,
+			.name   = ION_MM_HEAP_NAME,
+			.size   = MSM_ION_MM_SIZE,
+			.memory_type = ION_EBI_TYPE,
+			.extra_data = (void *)&cp_ion_pdata,
 		},
 #endif
 	}
@@ -3479,6 +3494,7 @@ static void __init reserve_ion_memory(void)
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += msm_ion_camera_size;
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_AUDIO_SIZE;
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_SF_SIZE;
+	msm7x30_reserve_table[MEMTYPE_EBI0].size += MSM_ION_MM_SIZE;
 #endif
 }
 
